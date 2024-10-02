@@ -58,17 +58,25 @@
         double airDensity = _calculationService.CalculateAirDensity(model.AirTemperature);
         double rollingResistance = _calculationService.CalculateRollingResistance(model.MassOfBike, model.MassOfRider);
         double slopePullForce = _calculationService.CalculateSlopePullForce(model.AltitudeGain, model.Distance, model.MassOfBike, model.MassOfRider);
+        double aero = _calculationService.CalculateAeroDragCoefficient(airDensity);
 
         if (calculationMode == "PowerToTime" && model.Power.HasValue)
         {
-            double totalForce = rollingResistance + slopePullForce;
-            double velocity = _calculationService.CalculateVelocity(model.Power.Value, totalForce, airDensity);
-            finishTime = (model.Distance / velocity) / 60;
+            // Use Newton's method to solve for velocity
+            double velocity = _calculationService.NewtonMethod(aero, rollingResistance, slopePullForce, model.Power.Value);
+
+            // Calculate time from velocity
+            finishTime = (model.Distance / velocity) / 60; // Time in minutes
         }
         else if (calculationMode == "TimeToPower" && model.Time.HasValue)
         {
-            double velocity = model.Distance / (model.Time.Value * 60);
-            requiredPower = _calculationService.CalculatePower(velocity, rollingResistance, slopePullForce, airDensity);
+            requiredPower = _calculationService.CalculateRequiredPower(
+                model.Distance,
+                model.Time.Value,
+                rollingResistance,
+                slopePullForce,
+                airDensity
+            );
         }
     }
 
