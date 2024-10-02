@@ -27,6 +27,12 @@ namespace CyclingPerformance.Web.Services
         public double CalculateVelocity(double distance, double timeInMinutes)
         {
             return distance / (timeInMinutes * 60); 
+
+        }
+
+        public double CalculateTimeInMinutes(double distance, double velocity)
+        { 
+            return (distance / velocity) / 60;
         }
 
         public double CalculateTotalPower(double velocity, double rollingResistance, double slopeForce, double airResistance)
@@ -38,7 +44,8 @@ namespace CyclingPerformance.Web.Services
         {
             double velocity = CalculateVelocity(distance, time);
             double airResistance = CalculateAirResistance(velocity, airDensity);
-            return CalculateTotalPower(velocity, rollingResistance, slopeForce, airResistance) / Physics.DrivetrainEfficiency;
+            double requiredPower = Math.Round(CalculateTotalPower(velocity, rollingResistance, slopeForce, airResistance) / Physics.DrivetrainEfficiency, 2);
+            return requiredPower;
         }
 
         public double CalculateAeroDragCoefficient(double airDensity)
@@ -46,7 +53,7 @@ namespace CyclingPerformance.Web.Services
             return Physics.Cd * Physics.A * 0.5 * airDensity;
         }
 
-        public double NewtonMethod(double aero, double tr, double slopeForce, double power)
+        public double NewtonMethod(double cda, double rollingResistance, double slopePullForce, double power)
         {
             double vel = 20; // Initial guess for velocity in m/s
             const int MAX = 10; // Max iterations
@@ -56,8 +63,8 @@ namespace CyclingPerformance.Web.Services
 
             for (int i = 0; i < MAX; i++)
             {
-                double f = vel * (aero * vel * vel + tr + slopeForce) - adjustedPower;
-                double fp = aero * 3.0 * vel * vel + tr + slopeForce;
+                double f = vel * (cda * vel * vel + rollingResistance + slopePullForce) - adjustedPower;
+                double fp = cda * 3.0 * vel * vel + rollingResistance + slopePullForce;
 
                 double vNew = vel - f / fp;
 

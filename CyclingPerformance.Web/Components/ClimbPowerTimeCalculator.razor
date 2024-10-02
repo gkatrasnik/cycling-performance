@@ -25,7 +25,7 @@
         <MudTextField T="double" Label="Distance (meters)" @bind-Value="model.Distance" Required="true" />
         <MudTextField T="double" Label="Altitude Gain (meters)" @bind-Value="model.AltitudeGain" Required="true" />
 
-        <MudButton Color="Color.Primary" OnClick="Calculate">Calculate</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="my-3" OnClick="Calculate">Calculate</MudButton>
     </MudForm>
 
     @if (calculationMode == "PowerToTime" && finishTime != null)
@@ -74,15 +74,15 @@
         double airDensity = _calculationService.CalculateAirDensity(model.AirTemperatureKelvin);
         double rollingResistance = _calculationService.CalculateRollingResistance(model.MassOfBike, model.MassOfRider);
         double slopePullForce = _calculationService.CalculateSlopePullForce(model.AltitudeGain, model.Distance, model.MassOfBike, model.MassOfRider);
-        double aero = _calculationService.CalculateAeroDragCoefficient(airDensity);
+        double cda = _calculationService.CalculateAeroDragCoefficient(airDensity);
 
         if (calculationMode == "PowerToTime" && model.Power.HasValue)
         {
             // Use Newton's method to solve for velocity
-            double velocity = _calculationService.NewtonMethod(aero, rollingResistance, slopePullForce, model.Power.Value);
+            double velocity = _calculationService.NewtonMethod(cda, rollingResistance, slopePullForce, model.Power.Value);
 
             // Calculate time from velocity
-            finishTime = (model.Distance / velocity) / 60; // Time in minutes
+            finishTime = _calculationService.CalculateTimeInMinutes(model.Distance, velocity);
         }
         else if (calculationMode == "TimeToPower" && model.Time.HasValue)
         {
