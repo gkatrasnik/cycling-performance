@@ -1,0 +1,79 @@
+﻿@using CyclingPerformance.Web.Models
+@using CyclingPerformance.Web.Constants
+@using CyclingPerformance.Web.Services
+@rendermode InteractiveServer
+
+<MudPaper Class="pa-4">
+    <MudForm @ref="form" Model="model" Validated="OnValidSubmit">
+        <MudSelect Label="Select Mode" @bind-Value="calculationMode" Required="true">
+            <MudSelectItem Value="@("PowerToTime")">Input Power, Get Time</MudSelectItem>
+            <MudSelectItem Value="@("TimeToPower")">Input Time, Get Power</MudSelectItem>
+        </MudSelect>
+
+        @if (calculationMode == "PowerToTime")
+        {
+            <MudTextField T="double?" Label="Power (P in Watts)" @bind-Value="model.Power" Required="true" />
+        }
+        else if (calculationMode == "TimeToPower")
+        {
+            <MudTextField T="double?" Label="Time (minutes)" @bind-Value="model.Time" Required="true" />
+        }
+
+        <MudTextField T="double" Label="Mass of Rider (m_rider in kg)" @bind-Value="model.MassOfRider" Required="true" />
+        <MudTextField T="double" Label="Mass of Bicycle (m_bike in kg)" @bind-Value="model.MassOfBike" Required="true" />
+        <MudTextField T="double" Label="Air Temperature (T in K)" @bind-Value="model.AirTemperature" Required="true" />
+        <MudTextField T="double" Label="Distance (meters)" @bind-Value="model.Distance" Required="true" />
+        <MudTextField T="double" Label="Altitude Gain (meters)" @bind-Value="model.AltitudeGain" Required="true" />
+
+        <MudButton Color="Color.Primary" OnClick="Calculate">Calculate</MudButton>
+    </MudForm>
+
+    @if (calculationMode == "PowerToTime" && finishTime != null)
+    {
+        <MudText Typo="Typo.h6" Color="Color.Primary">Finish Time: @finishTime.Value minutes</MudText>
+    }
+    else if (calculationMode == "TimeToPower" && requiredPower != null)
+    {
+        <MudText Typo="Typo.h6" Color="Color.Primary">Required Power: @requiredPower.Value Watts</MudText>
+    }
+</MudPaper>
+
+@code {
+    [Inject] private ICalculationService _calculationService { get; set; } = default!;
+    private MudForm form = new();
+    private ClimbPowerTimeModel model = new();
+    private string calculationMode = "PowerToTime";
+
+    private double? finishTime;
+    private double? requiredPower;
+
+    private void Calculate()
+    {
+        if (!form.IsValid)
+        {
+            Console.WriteLine("Form is invalid."); 
+            return;
+        }
+
+        double airDensity = _calculationService.CalculateAirDensity(model.AirTemperature);
+        double rollingResistance = _calculationService.CalculateRollingResistance(model.MassOfBike, model.MassOfRider);
+        double slopePullForce = _calculationService.CalculateSlopePullForce(model.AltitudeGain, model.Distance, model.MassOfBike, model.MassOfRider);
+
+        if (calculationMode == "PowerToTime" && model.Power.HasValue)
+        {
+            double totalForce = rollingResistance + slopePullForce;
+            double velocity = _calculationService.CalculateVelocity(model.Power.Value, totalForce, airDensity);
+            finishTime = (model.Distance / velocity) / 60;
+        }
+        else if (calculationMode == "TimeToPower" && model.Time.HasValue)
+        {
+            double velocity = model.Distance / (model.Time.Value * 60);
+            requiredPower = _calculationService.CalculatePower(velocity, rollingResistance, slopePullForce, airDensity);
+        }
+    }
+
+    private void OnValidSubmit()
+    {
+        Calculate();
+    }
+}
