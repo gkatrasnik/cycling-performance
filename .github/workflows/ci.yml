@@ -23,7 +23,7 @@ jobs:
     - name: Build the app
       run: dotnet build --configuration Release
 
-    - name: Publish WebApi
+    - name: Publish Cycling Performance App
       run: dotnet publish CyclingPerformance.Web/CyclingPerformance.Web.csproj --configuration Release --output ./publish
 
     - name: Copy files via SSH
