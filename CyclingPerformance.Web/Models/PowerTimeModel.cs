@@ -9,6 +9,7 @@
         public double MassOfBike { get; set; }
         public double AirTemperatureCelsius { get; set; }
         public double CdA { get; set; }
+        public double Cr { get; set; }
         public double Distance { get; set; }
         public double AltitudeGain { get; set; }
         public double AirTemperatureKelvin => AirTemperatureCelsius + 273.15;
