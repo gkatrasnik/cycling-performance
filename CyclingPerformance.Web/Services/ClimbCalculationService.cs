@@ -24,15 +24,15 @@ namespace CyclingPerformance.Web.Services
             return CalculateAeroDragCoefficient(airDensity) * Math.Pow(velocity, 2);
         }
 
-        public double CalculateVelocity(double distance, double timeInMinutes)
+        public double CalculateVelocity(double distance, double timeInSeconds)
         {
-            return distance / (timeInMinutes * 60); 
+            return distance / timeInSeconds;
 
         }
 
-        public double CalculateTimeInMinutes(double distance, double velocity)
-        { 
-            return (distance / velocity) / 60;
+        public double CalculateTimeInSeconds(double distance, double velocity)
+        {
+            return distance / velocity;
         }
 
         public double CalculateTotalPower(double velocity, double rollingResistance, double slopeForce, double airResistance)
@@ -40,9 +40,9 @@ namespace CyclingPerformance.Web.Services
             return velocity * (rollingResistance + slopeForce + airResistance);
         }
 
-        public double CalculateRequiredPower(double distance, double time, double rollingResistance, double slopeForce, double airDensity)
+        public double CalculateRequiredPower(double distance, double timeInSeconds, double rollingResistance, double slopeForce, double airDensity)
         {
-            double velocity = CalculateVelocity(distance, time);
+            double velocity = CalculateVelocity(distance, timeInSeconds);
             double airResistance = CalculateAirResistance(velocity, airDensity);
             double requiredPower = Math.Round(CalculateTotalPower(velocity, rollingResistance, slopeForce, airResistance) / Physics.DrivetrainEfficiency, 2);
             return requiredPower;

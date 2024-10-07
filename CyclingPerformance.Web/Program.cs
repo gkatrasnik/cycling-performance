@@ -10,7 +10,7 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddMudServices();
 
-builder.Services.AddScoped<ICalculationService, CalculationService>();
+builder.Services.AddScoped<IClimbCalculationService, ClimbCalculationService>();
 
 var app = builder.Build();
 

@@ -2,48 +2,79 @@
 @using CyclingPerformance.Web.Constants
 @using CyclingPerformance.Web.Services
 
-<MudPaper Class="pa-4">
-    <MudForm @ref="form" Model="model" Validated="OnValidSubmit">
-        <MudSelect Label="Select Mode" @bind-Value="calculationMode" Required="true">
-            <MudSelectItem Value="@("PowerToTime")">Input Power, Get Time</MudSelectItem>
-            <MudSelectItem Value="@("TimeToPower")">Input Time, Get Power</MudSelectItem>
-        </MudSelect>
+<MudCard>
+    <MudCardHeader>
+        <CardHeaderContent>
+            <MudText Typo="Typo.h6">Climb Power/Time calculator</MudText>
+        </CardHeaderContent>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudForm @ref="form" Model="model" Spacing="5" Validated="OnValidSubmit">
+            <MudSelect Label="Select Mode" @bind-Value="calculationMode" Required="true">
+                <MudSelectItem Value="@("PowerToTime")">Input Power, Get Time</MudSelectItem>
+                <MudSelectItem Value="@("TimeToPower")">Input Time, Get Power</MudSelectItem>
+            </MudSelect>
 
-        @if (calculationMode == "PowerToTime")
+            @if (calculationMode == "PowerToTime")
+            {            
+                <MudNumericField T="double?" Label="Power (P)" @bind-Value="model.Power" Required="true" />
+            }
+            else if (calculationMode == "TimeToPower")
+            {
+                <MudGrid>
+                    <MudItem xs="6">
+                        <MudNumericField T="double?" Label="Time (min)" @bind-Value="model.TimeMinutes" Required="true" />
+                    </MudItem>
+                    <MudItem xs="6">
+                        <MudNumericField T="double?" Label="Time (sec)" @bind-Value="model.TimeSeconds" Required="true" />
+                    </MudItem>
+                </MudGrid>
+            }
+
+            <MudGrid>
+                <MudItem xs="6">
+                    <MudNumericField T="double" Label="Rider Mass (kg)" @bind-Value="model.MassOfRider" Required="true" />
+                </MudItem>
+                <MudItem xs="6">
+                    <MudNumericField T="double" Label="Bicycle Mass (kg)" @bind-Value="model.MassOfBike" Required="true" />
+                </MudItem>
+            </MudGrid>
+        
+            <MudGrid>
+                <MudItem xs="6">
+                    <MudNumericField T="double" Label="Distance (m)" @bind-Value="model.Distance" Required="true" />
+                </MudItem>
+                <MudItem xs="6">
+                    <MudNumericField T="double" Label="Altitude Gain (m)" @bind-Value="model.AltitudeGain" Required="true" />
+                </MudItem>
+            </MudGrid>
+
+            <MudNumericField T="double" Label="Air Temperature (°C)" @bind-Value="model.AirTemperatureCelsius" Required="true" />
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="my-3" OnClick="Calculate">Calculate</MudButton>
+        </MudForm>
+
+        @if (calculationMode == "PowerToTime" && finishTimeMinutes != null && finishTimeSeconds != null)
         {
-            <MudTextField T="double?" Label="Power (P in Watts)" @bind-Value="model.Power" Required="true" />
+            <MudText Typo="Typo.h6" Color="Color.Primary">
+                Finish Time: @finishTimeMinutes min @finishTimeSeconds s
+            </MudText>
         }
-        else if (calculationMode == "TimeToPower")
+        else if (calculationMode == "TimeToPower" && requiredPower != null)
         {
-            <MudTextField T="double?" Label="Time (minutes)" @bind-Value="model.Time" Required="true" />
+            <MudText Typo="Typo.h6" Color="Color.Primary">Required Power: @requiredPower.Value Watt</MudText>
         }
-
-        <MudTextField T="double" Label="Mass of Rider (m_rider in kg)" @bind-Value="model.MassOfRider" Required="true" />
-        <MudTextField T="double" Label="Mass of Bicycle (m_bike in kg)" @bind-Value="model.MassOfBike" Required="true" />
-        <MudTextField T="double" Label="Air Temperature (T in K)" @bind-Value="model.AirTemperatureCelsius" Required="true" />
-        <MudTextField T="double" Label="Distance (meters)" @bind-Value="model.Distance" Required="true" />
-        <MudTextField T="double" Label="Altitude Gain (meters)" @bind-Value="model.AltitudeGain" Required="true" />
-
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="my-3" OnClick="Calculate">Calculate</MudButton>
-    </MudForm>
-
-    @if (calculationMode == "PowerToTime" && finishTime != null)
-    {
-        <MudText Typo="Typo.h6" Color="Color.Primary">Finish Time: @finishTime.Value minutes</MudText>
-    }
-    else if (calculationMode == "TimeToPower" && requiredPower != null)
-    {
-        <MudText Typo="Typo.h6" Color="Color.Primary">Required Power: @requiredPower.Value Watts</MudText>
-    }
-</MudPaper>
+    </MudCardContent>
+</MudCard>
 
 @code {
-    [Inject] private ICalculationService _calculationService { get; set; } = default!;
+    [Inject] private IClimbCalculationService _calculationService { get; set; } = default!;
     private MudForm form = new();
     private ClimbPowerTimeModel model = new();
     private string calculationMode = "PowerToTime";
 
-    private double? finishTime;
+    private double? finishTimeMinutes;
+    private double? finishTimeSeconds;
     private double? requiredPower;
 
     protected override void OnInitialized()
@@ -51,7 +82,8 @@
         model = new ClimbPowerTimeModel
             {
                 Power = 300,
-                Time = 15,
+                TimeMinutes = 14,
+                TimeSeconds = 0,
                 MassOfRider = 70,
                 MassOfBike = 9,
                 AirTemperatureCelsius = 25,
@@ -77,17 +109,19 @@
 
         if (calculationMode == "PowerToTime" && model.Power.HasValue)
         {
-            // Use Newton's method to solve for velocity
             double velocity = _calculationService.NewtonMethod(cda, rollingResistance, slopePullForce, model.Power.Value);
+            double timeInSeconds = _calculationService.CalculateTimeInSeconds(model.Distance, velocity);
 
-            // Calculate time from velocity
-            finishTime = _calculationService.CalculateTimeInMinutes(model.Distance, velocity);
+            finishTimeMinutes = Math.Floor(timeInSeconds / 60);
+            finishTimeSeconds = Math.Floor(timeInSeconds % 60);
         }
-        else if (calculationMode == "TimeToPower" && model.Time.HasValue)
+        else if (calculationMode == "TimeToPower" && model.TimeMinutes.HasValue && model.TimeSeconds.HasValue)
         {
+            double totalTimeInSeconds = (model.TimeMinutes.Value * 60) + model.TimeSeconds.Value;
+
             requiredPower = _calculationService.CalculateRequiredPower(
                 model.Distance,
-                model.Time.Value,
+                totalTimeInSeconds,
                 rollingResistance,
                 slopePullForce,
                 airDensity
