@@ -2,7 +2,7 @@
 
 namespace CyclingPerformance.Web.Services
 {
-    public class CalculationService : ICalculationService
+    public class PowerTimeCalculationService : IPowerTimeCalculationService
     {
         public double CalculateAirDensity(double airTemperature)
         {
@@ -19,9 +19,9 @@ namespace CyclingPerformance.Web.Services
             return (altitudeGain / distance) * (massOfBike + massOfRider) * Physics.g;
         }
 
-        public double CalculateAirResistance(double velocity, double airDensity)
+        public double CalculateAirResistance(double velocity, double cda, double airDensity)
         {
-            return CalculateAeroDragCoefficient(airDensity) * Math.Pow(velocity, 2);
+            return CalculateAeroDragCoefficient(cda, airDensity) * Math.Pow(velocity, 2);
         }
 
         public double CalculateVelocity(double distance, double timeInSeconds)
@@ -40,17 +40,16 @@ namespace CyclingPerformance.Web.Services
             return velocity * (rollingResistance + slopeForce + airResistance);
         }
 
-        public double CalculateRequiredPower(double distance, double timeInSeconds, double rollingResistance, double slopeForce, double airDensity)
-        {
-            double velocity = CalculateVelocity(distance, timeInSeconds);
-            double airResistance = CalculateAirResistance(velocity, airDensity);
-            double requiredPower = Math.Round(CalculateTotalPower(velocity, rollingResistance, slopeForce, airResistance) / Physics.DrivetrainEfficiency, 2);
+        public double CalculateRequiredPower(double velocity, double rollingResistance, double slopeForce, double cda, double airDensity)
+        {            
+            double airResistance = CalculateAirResistance(velocity, cda, airDensity);
+            double requiredPower = Math.Round(CalculateTotalPower(velocity, rollingResistance, slopeForce, airResistance) / Physics.DrivetrainEfficiency);
             return requiredPower;
         }
 
-        public double CalculateAeroDragCoefficient(double airDensity)
+        public double CalculateAeroDragCoefficient(double cda, double airDensity)
         {
-            return Physics.Cd * Physics.A * 0.5 * airDensity;
+            return cda * 0.5 * airDensity;
         }
 
         public double NewtonMethod(double cda, double rollingResistance, double slopePullForce, double power)
@@ -75,6 +74,11 @@ namespace CyclingPerformance.Web.Services
             }
 
             return 0.0; // Failed to converge
+        }
+
+        public double MsToKmh(double velocityMs)
+        { 
+            return Math.Round(velocityMs * 3.6, 2);
         }
     }
 }
