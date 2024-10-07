@@ -51,11 +51,14 @@
 
 
             <MudGrid>
-                <MudItem xs="6">
+                <MudItem xs="4">
                     <MudNumericField T="double" Label="Air Temperature (°C)" @bind-Value="model.AirTemperatureCelsius" Required="true" />
                 </MudItem>
-                <MudItem xs="6">
-                    <MudNumericField T="double" Label="Cda" @bind-Value="model.CdA" Required="true" Step="0.1"/>
+                <MudItem xs="4">
+                    <MudNumericField T="double" Label="Cda" @bind-Value="model.CdA" Required="true" Step="0.01" />
+                </MudItem>
+                <MudItem xs="4">
+                    <MudNumericField T="double" Label="Cr" @bind-Value="model.Cr" Required="true" Step="0.001" />
                 </MudItem>
             </MudGrid>
 
@@ -97,7 +100,8 @@
                 MassOfRider = 70,
                 MassOfBike = 9,
                 AirTemperatureCelsius = 25,
-                CdA = 0.4,
+                CdA = Physics.CdA,
+                Cr = Physics.Cr,
                 Distance = 3000,           
                 AltitudeGain = 300         
             };
@@ -114,7 +118,7 @@
         }
 
         double airDensity = _calculationService.CalculateAirDensity(model.AirTemperatureKelvin);
-        double rollingResistance = _calculationService.CalculateRollingResistance(model.MassOfBike, model.MassOfRider);
+        double rollingResistance = _calculationService.CalculateRollingResistance(model.MassOfBike, model.MassOfRider, model.Cr);
         double slopePullForce = _calculationService.CalculateSlopePullForce(model.AltitudeGain, model.Distance, model.MassOfBike, model.MassOfRider);
         double aeroDrag = _calculationService.CalculateAeroDragCoefficient(model.CdA, airDensity);
 

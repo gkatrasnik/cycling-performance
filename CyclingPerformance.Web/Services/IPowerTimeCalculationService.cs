@@ -3,7 +3,7 @@
     public interface IPowerTimeCalculationService
     {
         double CalculateAirDensity(double airTemperature);
-        double CalculateRollingResistance(double massOfBike, double massOfRider);
+        double CalculateRollingResistance(double massOfBike, double massOfRider, double cr);
         double CalculateSlopePullForce(double altitudeGain, double distance, double massOfBike, double massOfRider);
         double CalculateAirResistance(double velocity, double cda, double airDensity);
         double CalculateVelocity(double distance, double timeInMinutes);

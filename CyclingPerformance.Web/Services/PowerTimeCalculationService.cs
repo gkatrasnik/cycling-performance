@@ -9,9 +9,9 @@ namespace CyclingPerformance.Web.Services
             return Physics.p0 * (273 / airTemperature);
         }
 
-        public double CalculateRollingResistance(double massOfBike, double massOfRider)
+        public double CalculateRollingResistance(double massOfBike, double massOfRider, double cr)
         {
-            return Physics.g * (massOfBike + massOfRider) * Physics.Cr;
+            return Physics.g * (massOfBike + massOfRider) * cr;
         }
 
         public double CalculateSlopePullForce(double altitudeGain, double distance, double massOfBike, double massOfRider)
