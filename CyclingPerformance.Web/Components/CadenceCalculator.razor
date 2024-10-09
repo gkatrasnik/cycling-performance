@@ -1,0 +1,115 @@
+﻿@using CyclingPerformance.Web.Models
+@using CyclingPerformance.Web.Services
+
+<MudCard>
+    <MudCardHeader>
+        <CardHeaderContent>
+            <MudText Typo="Typo.h6">Cadence calculator</MudText>
+        </CardHeaderContent>
+    </MudCardHeader>
+    <MudCardContent>    
+        <MudForm @ref="cadenceCalculatorForm" Model="model" Spacing="5" Validated="OnValidSubmit">
+            <MudTextField T="string" Label="Chainrings (comma separated)" @bind-Value="chainringsInput" Required="true" />
+            <MudTextField T="string" Label="Sprockets (comma separated)" @bind-Value="sprocketsInput" Required="true" />
+
+            <MudGrid>
+                <MudItem xs="6">
+                    <MudNumericField T="double" Label="Rim Diameter (mm)" @bind-Value="model.RimDiameter" Required="true" />
+                </MudItem>
+                <MudItem xs="6">
+                    <MudNumericField T="double" Label="Tire Thickness (mm)" @bind-Value="model.TireThickness" Required="true" />
+                </MudItem>
+            </MudGrid>
+
+            <MudGrid>
+                <MudItem xs="4">
+                    <MudNumericField T="int" Label="Cadence From" @bind-Value="model.CadenceFrom" Required="true" />
+                </MudItem>
+                <MudItem xs="4">
+                    <MudNumericField T="int" Label="Cadence To" @bind-Value="model.CadenceTo" Required="true" />
+                </MudItem>
+                <MudItem xs="4">
+                    <MudNumericField T="int" Label="Cadence Step" @bind-Value="model.CadenceStep" Required="true" />
+                </MudItem>
+            </MudGrid>
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Calculate">Calculate</MudButton>
+        </MudForm>
+
+        @if (speedResults.Count > 0)
+        {
+            <MudSimpleTable Striped="true" Hover="true" Bordered="true" Class="mt-3">
+                <thead>
+                    <tr>
+                        <th>Gear</th>
+                        @foreach (var cadence in cadenceList)
+                        {
+                            <th>@cadence rpm</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var result in speedResults)
+                    {
+                        <tr>
+                            <td>@result.Gear</td>
+                            @foreach (var speed in result.Speeds)
+                            {
+                                <td>@speed.ToString("0.00") km/h</td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </MudSimpleTable>
+        }
+    </MudCardContent>
+</MudCard>
+@code {
+    [Inject] private ICadenceCalculationService _cadenceCalculationService { get; set; } = default!;
+    private MudForm cadenceCalculatorForm = new();
+    private CadenceCalculatorModel model = new CadenceCalculatorModel();
+    private List<int> cadenceList = new List<int>();
+    private List<(string Gear, List<double> Speeds)> speedResults = new();
+    private string chainringsInput = "36,52";
+    private string sprocketsInput = "11,12,13,14,15,17,19,21,24,27,30,34";
+
+    protected override void OnInitialized()
+    {
+        model = new CadenceCalculatorModel
+            {
+                Chainrings = [],
+                Sprockets = [],
+                CadenceFrom = 50,
+                CadenceTo = 130,
+                CadenceStep = 10,
+                RimDiameter = 622,
+                TireThickness = 28
+            };
+    }
+
+    private void Calculate()
+    {
+        model.Chainrings = chainringsInput.Split(',').Select(int.Parse).ToArray();
+        model.Sprockets = sprocketsInput.Split(',').Select(int.Parse).ToArray();
+
+        cadenceList = Enumerable.Range(0, (int)((model.CadenceTo - model.CadenceFrom) / model.CadenceStep) + 1)
+                                .Select(i => model.CadenceFrom + i * model.CadenceStep).ToList();
+
+        speedResults = new List<(string Gear, List<double> Speeds)>();
+
+        foreach (var chainring in model.Chainrings)
+        {
+            foreach (var sprocket in model.Sprockets)
+            {
+                var gear = $"{chainring}×{sprocket}";
+                var gearRatio = _cadenceCalculationService.CalculateGearRatio(chainring, sprocket);
+                var developmentMeters = _cadenceCalculationService.CalculateDevelopmentMeters(gearRatio, model.TireThickness, model.RimDiameter);
+                var speeds = cadenceList.Select(cadence => _cadenceCalculationService.CalculateSpeedKmh(developmentMeters, cadence)).ToList();
+                speedResults.Add((gear, speeds));
+            }
+        }
+    }
+
+    
+
+}

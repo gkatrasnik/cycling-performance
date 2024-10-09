@@ -9,7 +9,7 @@
         </CardHeaderContent>
     </MudCardHeader>
     <MudCardContent>
-        <MudForm @ref="form" Model="model" Spacing="5" Validated="OnValidSubmit">
+        <MudForm @ref="climbPowerCalculatorForm" Model="model" Spacing="5" Validated="OnValidSubmit">
             <MudSelect Label="Select Mode" @bind-Value="calculationMode" Required="true">
                 <MudSelectItem Value="@("PowerToTime")">Input Power, Get Time</MudSelectItem>
                 <MudSelectItem Value="@("TimeToPower")">Input Time, Get Power</MudSelectItem>
@@ -62,26 +62,30 @@
                 </MudItem>
             </MudGrid>
 
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="my-3" OnClick="Calculate">Calculate</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Calculate">Calculate</MudButton>
         </MudForm>
-
         @if (calculationMode == "PowerToTime" && finishTimeMinutes != null && finishTimeSeconds != null)
         {
-            <MudText Typo="Typo.h6" Color="Color.Primary">Finish Time: @finishTimeMinutes min @finishTimeSeconds s</MudText>
-            <MudText Typo="Typo.h6" Color="Color.Primary">Avg. Speed: @_calculationService.MsToKmh(velocity) km/h</MudText>
+            <div class="mt-3">
+                <MudText Typo="Typo.h6" Color="Color.Primary">Finish Time: @finishTimeMinutes min @finishTimeSeconds s</MudText>
+                <MudText Typo="Typo.h6" Color="Color.Primary">Avg. Speed: @_calculationService.MsToKmh(velocity) km/h</MudText>
+            </div>
 
         }
         else if (calculationMode == "TimeToPower" && requiredPower != null)
         {
-            <MudText Typo="Typo.h6" Color="Color.Primary">Required Power: @requiredPower.Value Watt</MudText>
-            <MudText Typo="Typo.h6" Color="Color.Primary">Avg. Speed: @_calculationService.MsToKmh(velocity) km/h</MudText>
+            <div class="mt-3">
+                <MudText Typo="Typo.h6" Color="Color.Primary">Required Power: @requiredPower.Value Watt</MudText>
+                <MudText Typo="Typo.h6" Color="Color.Primary">Avg. Speed: @_calculationService.MsToKmh(velocity) km/h</MudText>
+            </div>
         }
+
     </MudCardContent>
 </MudCard>
 
 @code {
     [Inject] private IPowerTimeCalculationService _calculationService { get; set; } = default!;
-    private MudForm form = new();
+    private MudForm climbPowerCalculatorForm = new();
     private PowerTimeModel model = new();
     private string calculationMode = "PowerToTime";
 
@@ -109,9 +113,9 @@
 
     private async void Calculate()
     {
-        await form.Validate();
+        await climbPowerCalculatorForm.Validate();
 
-        if (!form.IsValid)
+        if (!climbPowerCalculatorForm.IsValid)
         {
             Console.WriteLine("Form is invalid."); 
             return;

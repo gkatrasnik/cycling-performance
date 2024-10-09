@@ -11,6 +11,7 @@ builder.Services.AddRazorComponents()
 builder.Services.AddMudServices();
 
 builder.Services.AddScoped<IPowerTimeCalculationService, PowerTimeCalculationService>();
+builder.Services.AddScoped<ICadenceCalculationService, CadenceCalculationService>();
 
 var app = builder.Build();
 
