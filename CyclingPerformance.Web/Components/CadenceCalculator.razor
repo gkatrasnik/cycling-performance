@@ -14,22 +14,22 @@
 
             <MudGrid>
                 <MudItem xs="6">
-                    <MudNumericField T="double" Label="Rim Diameter (mm)" @bind-Value="model.RimDiameter" Required="true" />
+                    <MudNumericField T="double" Label="Rim Diameter (mm)" @bind-Value="model.RimDiameter" For="() => model.RimDiameter" Min="0" Required="true" />
                 </MudItem>
                 <MudItem xs="6">
-                    <MudNumericField T="double" Label="Tire Thickness (mm)" @bind-Value="model.TireThickness" Required="true" />
+                    <MudNumericField T="double" Label="Tire Thickness (mm)" @bind-Value="model.TireThickness" For="() => model.TireThickness" Min="0" Required="true" />
                 </MudItem>
             </MudGrid>
 
             <MudGrid>
                 <MudItem xs="4">
-                    <MudNumericField T="int" Label="Cadence From" @bind-Value="model.CadenceFrom" Required="true" />
+                    <MudNumericField T="int" Label="Cadence From" @bind-Value="model.CadenceFrom" For="() => model.CadenceFrom" Min="0" Max="model.CadenceTo" Required="true" />
                 </MudItem>
                 <MudItem xs="4">
-                    <MudNumericField T="int" Label="Cadence To" @bind-Value="model.CadenceTo" Required="true" />
+                    <MudNumericField T="int" Label="Cadence To" @bind-Value="model.CadenceTo" For="() => model.CadenceTo" Min="model.CadenceFrom" Required="true" />
                 </MudItem>
                 <MudItem xs="4">
-                    <MudNumericField T="int" Label="Cadence Step" @bind-Value="model.CadenceStep" Required="true" />
+                    <MudNumericField T="int" Label="Cadence Step" @bind-Value="model.CadenceStep" For="() => model.CadenceStep" Min="0" Required="true" />
                 </MudItem>
             </MudGrid>
 
