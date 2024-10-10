@@ -38,7 +38,9 @@
 
         @if (speedResults.Count > 0)
         {
-            <MudSimpleTable Striped="true" Hover="true" Bordered="true" Class="mt-3">
+            <p class="mb-0 mt-3 text-center">Speed (km/h)</p>
+            <MudSimpleTable Striped="true" Hover="true" Bordered="true" FixedHeader="true" Class="mt-3" Style="height: 650px">
+
                 <thead>
                     <tr>
                         <th>Gear</th>
@@ -55,7 +57,7 @@
                             <td>@result.Gear</td>
                             @foreach (var speed in result.Speeds)
                             {
-                                <td>@speed.ToString("0.00") km/h</td>
+                                <td>@speed.ToString("0.00")</td>
                             }
                         </tr>
                     }
