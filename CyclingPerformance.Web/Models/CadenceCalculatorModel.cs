@@ -19,7 +19,7 @@ namespace CyclingPerformance.Web.Models
         [Range(0, int.MaxValue, ErrorMessage = "Cadence cannot be negative.")]
         public int CadenceTo { get; set; }
 
-        [Range(0, int.MaxValue, ErrorMessage = "Cadence cannot be negative.")]
+        [Range(1, int.MaxValue, ErrorMessage = "Cadence must be positive.")]
         public int CadenceStep { get; set; }
     }
 }

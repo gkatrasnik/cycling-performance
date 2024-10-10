@@ -9,7 +9,7 @@
         </CardHeaderContent>
     </MudCardHeader>
     <MudCardContent>
-        <MudForm @ref="climbPowerCalculatorForm" Model="model" Spacing="5" Validation="true" Validated="OnValidSubmit">
+        <MudForm @ref="climbPowerCalculatorForm" Model="model" Spacing="5" Validated="OnValidSubmit">
             <MudSelect Label="Select Mode" @bind-Value="calculationMode" Required="true">
                 <MudSelectItem Value="@("PowerToTime")">Input Power, Get Time</MudSelectItem>
                 <MudSelectItem Value="@("TimeToPower")">Input Time, Get Power</MudSelectItem>
@@ -17,32 +17,32 @@
 
             @if (calculationMode == "PowerToTime")
             {
-                <MudNumericField T="double?" Label="Power (P)" @bind-Value="model.Power" For="() => model.TimeMinutes" Min="0" Required="true" />
+                <MudNumericField T="double?" Label="Power (P)" @bind-Value="model.Power" For="() => model.TimeMinutes" Required="true" />
             }
             else if (calculationMode == "TimeToPower")
             {
                 <MudGrid>
                     <MudItem xs="6">
-                        <MudNumericField T="double?" Label="Time (min)" @bind-Value="model.TimeMinutes" For="() => model.TimeMinutes" Min="0" Required="true" />
+                        <MudNumericField T="double?" Label="Time (min)" @bind-Value="model.TimeMinutes" For="() => model.TimeMinutes" Required="true" />
                     </MudItem>
                     <MudItem xs="6">
-                        <MudNumericField T="double?" Label="Time (sec)" @bind-Value="model.TimeSeconds" For="() => model.TimeSeconds" Min="0" Required="true" />
+                        <MudNumericField T="double?" Label="Time (sec)" @bind-Value="model.TimeSeconds" For="() => model.TimeSeconds" Required="true" />
                     </MudItem>
                 </MudGrid>
             }
 
             <MudGrid>
                 <MudItem xs="6">
-                    <MudNumericField T="double" Label="Rider Mass (kg)" @bind-Value="model.MassOfRider" For="() => model.MassOfRider" Min="0" Required="true" />
+                    <MudNumericField T="double" Label="Rider Mass (kg)" @bind-Value="model.MassOfRider" For="() => model.MassOfRider" Required="true" />
                 </MudItem>
                 <MudItem xs="6">
-                    <MudNumericField T="double" Label="Bicycle Mass (kg)" @bind-Value="model.MassOfBike" For="() => model.MassOfBike" Min="0" Required="true" />
+                    <MudNumericField T="double" Label="Bicycle Mass (kg)" @bind-Value="model.MassOfBike" For="() => model.MassOfBike" Required="true" />
                 </MudItem>
             </MudGrid>
         
             <MudGrid>
                 <MudItem xs="6">
-                    <MudNumericField T="double" Label="Distance (m)" @bind-Value="model.Distance" For="() => model.Distance" Min="0" Required="true" />
+                    <MudNumericField T="double" Label="Distance (m)" @bind-Value="model.Distance" For="() => model.Distance" Required="true" />
                 </MudItem>
                 <MudItem xs="6">
                     <MudNumericField T="double" Label="Altitude Gain (m)" @bind-Value="model.AltitudeGain" For="() => model.AltitudeGain" Required="true" />
@@ -55,10 +55,10 @@
                     <MudNumericField T="double" Label="Air Temperature (°C)" @bind-Value="model.AirTemperatureCelsius" For="() => model.AirTemperatureCelsius" Required="true" />
                 </MudItem>
                 <MudItem xs="4">
-                    <MudNumericField T="double" Label="Cda" @bind-Value="model.CdA" Required="true" For="() => model.CdA" Min="0" Step="0.01" />
+                    <MudNumericField T="double" Label="Cda" @bind-Value="model.CdA" Required="true" For="() => model.CdA" Step="0.01" />
                 </MudItem>
                 <MudItem xs="4">
-                    <MudNumericField T="double" Label="Cr" @bind-Value="model.Crr" Required="true" For="() => model.Crr" Min="0" Step="0.001" />
+                    <MudNumericField T="double" Label="Cr" @bind-Value="model.Crr" Required="true" For="() => model.Crr" Step="0.001" />
                 </MudItem>
             </MudGrid>
 
