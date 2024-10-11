@@ -1,0 +1,144 @@
+﻿@using CyclingPerformance.Web.Services
+@using CyclingPerformance.Web.Models
+
+<MudCard>
+    <MudCardHeader>
+        <CardHeaderContent>
+            <MudText Typo="Typo.h6">Critical power calculator</MudText>
+        </CardHeaderContent>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudForm @ref="criticalPowerForm" Spacing="5" Validated="OnValidSubmit">
+            <MudGrid>
+                <MudItem xs="6">
+                    <MudNumericField T="double" Label="Time 1 (min)" @bind-Value="model.Time1" For="() => model.Time1" Min="1" Max="model.Time2" Required="true" />
+                </MudItem>
+                <MudItem xs="6">
+                    <MudNumericField T="double" Label="Power 1 (watts)" @bind-Value="model.Power1" For="() => model.Power1" Min="1" Required="true" />
+                </MudItem>
+            </MudGrid>
+
+            <MudGrid>
+                <MudItem xs="6">
+                    <MudNumericField T="double" Label="Time 2 (min)" @bind-Value="model.Time2" For="() => model.Time2" Min="model.Time1" Max="model.Time3" Required="true" />
+                </MudItem>
+                <MudItem xs="6">
+                    <MudNumericField T="double" Label="Power 2 (watts)" @bind-Value="model.Power2" For="() => model.Power2" Min="1" Required="true" />
+                </MudItem>
+            </MudGrid>
+
+            <MudGrid>
+                <MudItem xs="6">
+                    <MudNumericField T="double" Label="Time 3 (min)" @bind-Value="model.Time3" For="() => model.Time3" Min="model.Time2" Required="true" />
+                </MudItem>
+                <MudItem xs="6">
+                    <MudNumericField T="double" Label="Power 3 (watts)" @bind-Value="model.Power3" For="() => model.Power3" Min="1" Required="true" />
+                </MudItem>
+            </MudGrid>
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Calculate">Calculate</MudButton>
+        </MudForm>
+
+        @if (cp != 0 && wPrime != 0)
+        {
+            <div class="my-3">
+                <MudText Typo="Typo.h6" Color="Color.Primary">Critical power: @cp W</MudText>
+                <MudText Typo="Typo.h6" Color="Color.Primary">W': @wPrime kJ</MudText>
+            </div>
+
+            <MudChart ChartType="ChartType.Line" ChartSeries="@datasets" @bind-SelectedIndex="selectedIndex" XAxisLabels="@labels" ChartOptions="chartOptions" Width="100%" Class="px-3"/>
+        }
+        
+    </MudCardContent>
+</MudCard>
+@code {
+    [Inject] ICriticalPowerCalculationService _criticalPowerCalculatorService { get; set; } = default!;
+    private CriticalPowerInputModel model = new();
+    private MudForm criticalPowerForm = new()!;
+
+    private int selectedIndex = -1;
+    public ChartOptions chartOptions = new ChartOptions()
+    {
+        InterpolationOption = InterpolationOption.NaturalSpline
+    };
+
+    private double m;
+    private double cp;
+    private double wPrime;
+
+    private string[] labels = [];
+    private List<ChartSeries> datasets = new List<ChartSeries>();
+
+    protected override void OnInitialized()
+    {
+        model = new CriticalPowerInputModel
+            {
+                Time1 = 1,
+                Power1 = 700,
+                Time2 = 5,
+                Power2 = 400,
+                Time3 = 20,
+                Power3 = 350
+            };
+    }
+
+    private async Task Calculate()
+    {
+        await criticalPowerForm.Validate();
+
+        if (!criticalPowerForm.IsValid)
+        {
+            Console.WriteLine("Form is invalid.");
+            return;
+        }
+
+        double t1 = model.Time1; // Time in minutes
+        double t2 = model.Time2;
+        double t3 = model.Time3;
+
+        // Convert minutes to seconds for calculations
+        double t1InSeconds = t1 * 60;
+        double t2InSeconds = t2 * 60;
+        double t3InSeconds = t3 * 60;
+
+        m = _criticalPowerCalculatorService.CalculateM(1 / t1InSeconds, 1 / t2InSeconds, 1 / t3InSeconds, model.Power1, model.Power2, model.Power3);
+        cp = Math.Round(_criticalPowerCalculatorService.CalculateCP(m, 1 / t1InSeconds, 1 / t2InSeconds, 1 / t3InSeconds, model.Power1, model.Power2, model.Power3));
+        wPrime = Math.Round(m / 1000, 2); // Displaying W' in kJ directly
+
+        List<(double TimeInSeconds, string Label, double Power)> durations = new List<(double, string, double)>();
+
+        int[] intervalsInMinutes = new int[] { 1, 2, 3, 5, 8, 12, 20, 60, 120, 180 }; // These are minutes
+        foreach (var interval in intervalsInMinutes)
+        {
+            double timeInSeconds = interval * 60;
+            double predictedPower = _criticalPowerCalculatorService.CalculatePowerAt(m, cp, timeInSeconds);
+            durations.Add((timeInSeconds, $"{interval} min", predictedPower));
+        }
+
+        double[] userInputDurations = { model.Time1, model.Time2, model.Time3 };
+        foreach (var userInput in userInputDurations)
+        {
+            int userInputInMinutes = (int)userInput;
+            if (!intervalsInMinutes.Contains(userInputInMinutes))
+            {
+                durations.Add((userInput * 60, $"{userInputInMinutes} min", _criticalPowerCalculatorService.CalculatePowerAt(m, cp, userInput * 60)));
+            }
+        }
+
+        var sortedDurations = durations.OrderBy(d => d.TimeInSeconds).ToList();
+
+        labels = sortedDurations.Select(d => d.Label).ToArray();
+        datasets = new List<ChartSeries>
+        {
+            new ChartSeries { Name = "Power Duration", Data = sortedDurations.Select(d => d.Power).ToArray() }
+        };
+    }
+
+
+
+
+    private void OnValidSubmit()
+    {
+        Calculate();
+    }
+}

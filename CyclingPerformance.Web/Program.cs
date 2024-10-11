@@ -12,6 +12,7 @@ builder.Services.AddMudServices();
 
 builder.Services.AddScoped<IPowerTimeCalculationService, PowerTimeCalculationService>();
 builder.Services.AddScoped<ICadenceCalculationService, CadenceCalculationService>();
+builder.Services.AddScoped<ICriticalPowerCalculationService, CriticalPowerCalculationService>();
 
 var app = builder.Build();
 
