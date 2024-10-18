@@ -2,7 +2,7 @@
 
 namespace CyclingPerformance.Web.Models
 {
-    public class CadenceCalculatorModel
+    public class CadenceSpeedCalculatorModel
     {
         public int[] Chainrings { get; set; } = Array.Empty<int>();
         public int[] Sprockets { get; set; } = Array.Empty<int>();

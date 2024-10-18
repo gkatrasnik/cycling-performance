@@ -5,12 +5,15 @@
         <CardHeaderContent>
             <MudText Typo="Typo.h6">FTP Zones Calculator</MudText>
         </CardHeaderContent>
+        <CardHeaderActions>
+            <MudIconButton Icon="@Icons.Material.Filled.Minimize" Color="Color.Default" OnClick="ResetCalculation" />
+        </CardHeaderActions>
     </MudCardHeader>
     <MudCardContent>
         <MudForm @ref="ftpForm" Model="model" Spacing="5" >
-            <MudNumericField T="double" Label="FTP (W)" @bind-Value="model.FTP" For="() => model.FTP" Required="true" />
+            <MudNumericField T="double" Label="FTP (W)" @bind-Value="model.FTP" For="() => model.FTP" Min="1" Required="true" />
 
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CalculateZones">Calculate Zones</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CalculateZones">Calculate</MudButton>
         </MudForm>
 
         @if (zonesResults.Count > 0)
@@ -20,7 +23,7 @@
                     <tr>
                         <th>Zone</th>
                         <th>Description</th>
-                        <th>Range (Watts)</th>
+                        <th>Range (W)</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -69,5 +72,10 @@
             new FtpZoneModel("Z6", "Anaerobic Capacity", $"{1.21 * ftp:0} - {1.50 * ftp:0} W"),
             new FtpZoneModel("Z7", "Neuromuscular Power", $"> {1.50 * ftp:0} W")
         };
-    }  
+    }
+
+    private void ResetCalculation()
+    {
+        zonesResults.Clear();
+    }
 }

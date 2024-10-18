@@ -5,11 +5,14 @@
 <MudCard>
     <MudCardHeader>
         <CardHeaderContent>
-            <MudText Typo="Typo.h6">Power/Time calculator</MudText>
+            <MudText Typo="Typo.h6">Power - Time Calculator</MudText>
         </CardHeaderContent>
+        <CardHeaderActions>
+            <MudIconButton Icon="@Icons.Material.Filled.Minimize" Color="Color.Default" OnClick="ResetCalculation" />
+        </CardHeaderActions>
     </MudCardHeader>
     <MudCardContent>
-        <MudForm @ref="climbPowerCalculatorForm" Model="model" Spacing="5" Validated="OnValidSubmit">
+        <MudForm @ref="climbPowerCalculatorForm" Model="model" Spacing="5">
             <MudSelect Label="Select Mode" @bind-Value="calculationMode" Required="true">
                 <MudSelectItem Value="@("PowerToTime")">Input Power, Get Time</MudSelectItem>
                 <MudSelectItem Value="@("TimeToPower")">Input Time, Get Power</MudSelectItem>
@@ -55,7 +58,7 @@
                     <MudNumericField T="double" Label="Air Temp. (°C)" @bind-Value="model.AirTemperatureCelsius" For="() => model.AirTemperatureCelsius" Required="true" />
                 </MudItem>
                 <MudItem xs="6">
-                    <MudNumericField T="double" Label="Headwind (m/s)" @bind-Value="model.Headwind" For="() => model.Headwind" Required="true" />
+                    <MudNumericField T="double" Label="Headwind (km/h)" @bind-Value="model.Headwind" For="() => model.Headwind" Required="true" />
                 </MudItem>
             </MudGrid>
             <MudGrid>
@@ -137,10 +140,11 @@
         double rollingResistance = _calculationService.CalculateRollingResistance(model.MassOfBike, model.MassOfRider, model.Crr);
         double slopePullForce = _calculationService.CalculateSlopePullForce(model.AltitudeGain, model.Distance, model.MassOfBike, model.MassOfRider);
         double aeroDrag = _calculationService.CalculateAeroDragCoefficient(model.CdA, airDensity);
+        double headwind = _calculationService.KmhToMs(model.Headwind);
 
         if (calculationMode == "PowerToTime" && model.Power.HasValue)
         {
-            avgSpeed = _calculationService.NewtonMethod(aeroDrag, model.Headwind, rollingResistance, slopePullForce, model.Power.Value);
+            avgSpeed = _calculationService.NewtonMethod(aeroDrag, headwind, rollingResistance, slopePullForce, model.Power.Value);
             double timeInSeconds = _calculationService.CalculateTimeInSeconds(model.Distance, avgSpeed);
 
             finishTimeMinutes = Math.Floor(timeInSeconds / 60);
@@ -160,12 +164,19 @@
                 slopePullForce,
                 model.CdA,
                 airDensity,
-                model.Headwind
+                headwind
             );
 
             vam = @_calculationService.CalculateVAM(model.AltitudeGain, _calculationService.ConvertToSeconds(model.TimeMinutes!.Value, model.TimeSeconds!.Value));
             relativePower = @_calculationService.CalculateWkg(requiredPower.Value, model.MassOfRider);
         }
+    }
+
+    private void ResetCalculation()
+    {
+        finishTimeMinutes = null;
+        finishTimeSeconds = null;
+        requiredPower = null;
     }
 
     private void OnValidSubmit()

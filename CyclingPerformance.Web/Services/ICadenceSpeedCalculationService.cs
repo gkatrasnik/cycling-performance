@@ -1,6 +1,6 @@
 ﻿namespace CyclingPerformance.Web.Services
 {
-    public interface ICadenceCalculationService
+    public interface ICadenceSpeedCalculationService
     {
         double CalculateSpeed(double developmentMeters, double cadence);
         double CalculateGearRatio(double chainring, double sprocket);

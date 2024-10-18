@@ -1,6 +1,6 @@
 ﻿namespace CyclingPerformance.Web.Services
 {
-    public class CadenceCalculationService: ICadenceCalculationService
+    public class CadenceSpeedCalculationService: ICadenceSpeedCalculationService
     {
         public double CalculateSpeed(double developmentMeters, double cadence)
         {

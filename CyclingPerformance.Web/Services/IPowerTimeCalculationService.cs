@@ -15,6 +15,7 @@
         double CalculateWkg(double power, double massOfRider);
         double NewtonMethod(double cda, double headwind,double rollingResistance, double slopePullForce, double power);
         double MsToKmh(double velocityMs);
+        double KmhToMs(double velocityKmh);
         double ConvertToSeconds(double timeMinutes, double timeSeconds);
     }
 }

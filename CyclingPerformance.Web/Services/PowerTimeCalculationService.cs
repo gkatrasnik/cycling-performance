@@ -95,6 +95,12 @@ namespace CyclingPerformance.Web.Services
             return Math.Round(velocityMs * 3.6, 2);
         }
 
+        public double KmhToMs(double velocityKmh)
+        {
+            return Math.Round(velocityKmh * 0.2777778, 2);
+        }
+
+
         public double ConvertToSeconds(double timeMinutes, double timeSeconds)
         {
             return (timeMinutes * 60) + timeSeconds;

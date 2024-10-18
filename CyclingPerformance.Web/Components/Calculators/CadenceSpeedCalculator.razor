@@ -4,11 +4,14 @@
 <MudCard>
     <MudCardHeader>
         <CardHeaderContent>
-            <MudText Typo="Typo.h6">Cadence calculator</MudText>
+            <MudText Typo="Typo.h6">Cadence - Speed Calculator</MudText>
         </CardHeaderContent>
+        <CardHeaderActions>
+            <MudIconButton Icon="@Icons.Material.Filled.Minimize" Color="Color.Default" OnClick="ResetCalculation" />
+        </CardHeaderActions>
     </MudCardHeader>
     <MudCardContent>    
-        <MudForm @ref="cadenceCalculatorForm" Model="model" Spacing="5" >
+        <MudForm @ref="cadenceSpeedCalculatorForm" Model="model" Spacing="5" >
             <MudTextField T="string" Label="Chainrings (comma separated)" @bind-Value="chainringsInput" Required="true" />
             <MudTextField T="string" Label="Sprockets (comma separated)" @bind-Value="sprocketsInput" Required="true" />
 
@@ -67,9 +70,9 @@
     </MudCardContent>
 </MudCard>
 @code {
-    [Inject] private ICadenceCalculationService _cadenceCalculationService { get; set; } = default!;
-    private MudForm cadenceCalculatorForm = new();
-    private CadenceCalculatorModel model = new CadenceCalculatorModel();
+    [Inject] private ICadenceSpeedCalculationService _cadenceSpeedCalculationService { get; set; } = default!;
+    private MudForm cadenceSpeedCalculatorForm = new();
+    private CadenceSpeedCalculatorModel model = new CadenceSpeedCalculatorModel();
     private List<int> cadenceList = new List<int>();
     private List<(string Gear, List<double> Speeds)> speedResults = new();
     private string chainringsInput = "36,52";
@@ -77,7 +80,7 @@
 
     protected override void OnInitialized()
     {
-        model = new CadenceCalculatorModel
+        model = new CadenceSpeedCalculatorModel
             {
                 Chainrings = [],
                 Sprockets = [],
@@ -91,9 +94,9 @@
 
     private async Task Calculate()
     {
-        await cadenceCalculatorForm.Validate();
+        await cadenceSpeedCalculatorForm.Validate();
 
-        if (!cadenceCalculatorForm.IsValid)
+        if (!cadenceSpeedCalculatorForm.IsValid)
         {
             Console.WriteLine("Form is invalid.");
             return;
@@ -112,14 +115,16 @@
             foreach (var sprocket in model.Sprockets)
             {
                 var gear = $"{chainring}×{sprocket}";
-                var gearRatio = _cadenceCalculationService.CalculateGearRatio(chainring, sprocket);
-                var developmentMeters = _cadenceCalculationService.CalculateDevelopmentMeters(gearRatio, model.TireThickness, model.RimDiameter);
-                var speeds = cadenceList.Select(cadence => _cadenceCalculationService.CalculateSpeedKmh(developmentMeters, cadence)).ToList();
+                var gearRatio = _cadenceSpeedCalculationService.CalculateGearRatio(chainring, sprocket);
+                var developmentMeters = _cadenceSpeedCalculationService.CalculateDevelopmentMeters(gearRatio, model.TireThickness, model.RimDiameter);
+                var speeds = cadenceList.Select(cadence => _cadenceSpeedCalculationService.CalculateSpeedKmh(developmentMeters, cadence)).ToList();
                 speedResults.Add((gear, speeds));
             }
         }
     }
 
-    
-
+    private void ResetCalculation()
+    {
+        speedResults.Clear();           
+    }
 }

@@ -4,8 +4,11 @@
 <MudCard>
     <MudCardHeader>
         <CardHeaderContent>
-            <MudText Typo="Typo.h6">Critical power calculator</MudText>
+            <MudText Typo="Typo.h6">Critical Power Calculator</MudText>
         </CardHeaderContent>
+        <CardHeaderActions>
+            <MudIconButton Icon="@Icons.Material.Filled.Minimize" Color="Color.Default" OnClick="ResetCalculation" />
+        </CardHeaderActions>
     </MudCardHeader>
     <MudCardContent>
         <MudForm @ref="criticalPowerForm" Spacing="5">
@@ -135,6 +138,12 @@
         {
             new ChartSeries { Name = "Power Duration", Data = sortedDurations.Select(d => d.Power).ToArray() }
         };
+    }
+
+    private void ResetCalculation()
+    {
+        cp = 0;
+        wPrime = 0;
     }
 
     private void OnValidSubmit()
