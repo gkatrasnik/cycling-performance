@@ -32,6 +32,8 @@ namespace CyclingPerformance.Web.Models
 
         public double AltitudeGain { get; set; }
 
+        public double Headwind{ get; set; }
+
         public double AirTemperatureKelvin => AirTemperatureCelsius + 273.15;
     }
 }

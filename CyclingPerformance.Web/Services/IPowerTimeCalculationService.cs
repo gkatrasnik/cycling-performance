@@ -5,13 +5,15 @@
         double CalculateAirDensity(double airTemperature);
         double CalculateRollingResistance(double massOfBike, double massOfRider, double crr);
         double CalculateSlopePullForce(double altitudeGain, double distance, double massOfBike, double massOfRider);
-        double CalculateAirResistance(double velocity, double cda, double airDensity);
+        double CalculateAirResistance(double velocity, double cda, double airDensity, double headwind);
         double CalculateVelocity(double distance, double timeInSeconds);
         double CalculateTimeInSeconds(double distance, double velocity);
         double CalculateTotalPower(double velocity, double rollingResistance, double slopeForce, double airResistance);
-        double CalculateRequiredPower(double velocity, double rollingResistance, double slopeForce, double cda, double airDensity);
+        double CalculateRequiredPower(double velocity, double rollingResistance, double slopeForce, double cda, double airDensity, double headwind);
         double CalculateAeroDragCoefficient(double cda, double airDensity);
-        double NewtonMethod(double cda, double rollingResistance, double slopePullForce, double power);
+        double CalculateVAM(double ascend, double timeInSeconds);
+        double NewtonMethod(double cda, double headwind,double rollingResistance, double slopePullForce, double power);
         double MsToKmh(double velocityMs);
+        double ConvertToSeconds(double timeMinutes, double timeSeconds);
     }
 }

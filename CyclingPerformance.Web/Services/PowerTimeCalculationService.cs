@@ -19,9 +19,10 @@ namespace CyclingPerformance.Web.Services
             return (altitudeGain / distance) * (massOfBike + massOfRider) * Physics.g;
         }
 
-        public double CalculateAirResistance(double velocity, double cda, double airDensity)
+        public double CalculateAirResistance(double velocity, double cda, double airDensity, double headwind)
         {
-            return CalculateAeroDragCoefficient(cda, airDensity) * Math.Pow(velocity, 2);
+            double adjustedVelocity = velocity + headwind;
+            return CalculateAeroDragCoefficient(cda, airDensity) * Math.Pow(adjustedVelocity, 2);
         }
 
         public double CalculateVelocity(double distance, double timeInSeconds)
@@ -40,9 +41,9 @@ namespace CyclingPerformance.Web.Services
             return velocity * (rollingResistance + slopeForce + airResistance);
         }
 
-        public double CalculateRequiredPower(double velocity, double rollingResistance, double slopeForce, double cda, double airDensity)
-        {            
-            double airResistance = CalculateAirResistance(velocity, cda, airDensity);
+        public double CalculateRequiredPower(double velocity, double rollingResistance, double slopeForce, double cda, double airDensity, double headwind)
+        {
+            double airResistance = CalculateAirResistance(velocity, cda, airDensity, headwind);
             double requiredPower = Math.Round(CalculateTotalPower(velocity, rollingResistance, slopeForce, airResistance) / Physics.DrivetrainEfficiency);
             return requiredPower;
         }
@@ -52,7 +53,13 @@ namespace CyclingPerformance.Web.Services
             return cda * 0.5 * airDensity;
         }
 
-        public double NewtonMethod(double cda, double rollingResistance, double slopePullForce, double power)
+        public double CalculateVAM(double ascend, double timeInSeconds)
+        {
+            double timeInHours = timeInSeconds / 3600;
+            return Math.Round(ascend / timeInHours);
+        }
+
+        public double NewtonMethod(double cda, double headwind, double rollingResistance, double slopePullForce, double power)
         {
             double vel = 20; // Initial guess for velocity in m/s
             const int MAX = 10; // Max iterations
@@ -62,8 +69,10 @@ namespace CyclingPerformance.Web.Services
 
             for (int i = 0; i < MAX; i++)
             {
-                double f = vel * (cda * vel * vel + rollingResistance + slopePullForce) - adjustedPower;
-                double fp = cda * 3.0 * vel * vel + rollingResistance + slopePullForce;
+                // Calculate air resistance with headwind
+                double airResistance = CalculateAirResistance(vel, cda, Physics.p0, headwind);
+                double f = vel * (airResistance + rollingResistance + slopePullForce) - adjustedPower;
+                double fp = 3.0 * airResistance + rollingResistance + slopePullForce;
 
                 double vNew = vel - f / fp;
 
@@ -77,8 +86,13 @@ namespace CyclingPerformance.Web.Services
         }
 
         public double MsToKmh(double velocityMs)
-        { 
+        {
             return Math.Round(velocityMs * 3.6, 2);
+        }
+
+        public double ConvertToSeconds(double timeMinutes, double timeSeconds)
+        {
+            return (timeMinutes * 60) + timeSeconds;
         }
     }
 }

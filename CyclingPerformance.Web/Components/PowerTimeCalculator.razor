@@ -51,14 +51,19 @@
 
 
             <MudGrid>
-                <MudItem xs="4">
-                    <MudNumericField T="double" Label="Air Temperature (°C)" @bind-Value="model.AirTemperatureCelsius" For="() => model.AirTemperatureCelsius" Required="true" />
+                <MudItem xs="6">
+                    <MudNumericField T="double" Label="Air Temp. (°C)" @bind-Value="model.AirTemperatureCelsius" For="() => model.AirTemperatureCelsius" Required="true" />
                 </MudItem>
-                <MudItem xs="4">
+                <MudItem xs="6">
+                    <MudNumericField T="double" Label="Headwind (m/s)" @bind-Value="model.Headwind" For="() => model.Headwind" Required="true" />
+                </MudItem>
+            </MudGrid>
+            <MudGrid>
+                <MudItem xs="6">
                     <MudNumericField T="double" Label="Cda" @bind-Value="model.CdA" Required="true" For="() => model.CdA" Step="0.01" />
                 </MudItem>
-                <MudItem xs="4">
-                    <MudNumericField T="double" Label="Cr" @bind-Value="model.Crr" Required="true" For="() => model.Crr" Step="0.001" />
+                <MudItem xs="6">
+                    <MudNumericField T="double" Label="Crr" @bind-Value="model.Crr" Required="true" For="() => model.Crr" Step="0.001" />
                 </MudItem>
             </MudGrid>
 
@@ -69,6 +74,7 @@
             <div class="mt-3">
                 <MudText Typo="Typo.h6" Color="Color.Primary">Finish Time: @finishTimeMinutes min @finishTimeSeconds s</MudText>
                 <MudText Typo="Typo.h6" Color="Color.Primary">Avg. Speed: @_calculationService.MsToKmh(velocity) km/h</MudText>
+                <MudText Typo="Typo.h6" Color="Color.Primary">VAM: @_calculationService.CalculateVAM(model.AltitudeGain, _calculationService.ConvertToSeconds(finishTimeMinutes.Value, finishTimeSeconds.Value)) m/h</MudText>
             </div>
 
         }
@@ -77,6 +83,7 @@
             <div class="mt-3">
                 <MudText Typo="Typo.h6" Color="Color.Primary">Required Power: @requiredPower.Value Watt</MudText>
                 <MudText Typo="Typo.h6" Color="Color.Primary">Avg. Speed: @_calculationService.MsToKmh(velocity) km/h</MudText>
+                <MudText Typo="Typo.h6" Color="Color.Primary">VAM: @_calculationService.CalculateVAM(model.AltitudeGain, _calculationService.ConvertToSeconds(model.TimeMinutes!.Value, model.TimeSeconds!.Value)) m/h</MudText>
             </div>
         }
 
@@ -107,7 +114,8 @@
                 CdA = Physics.CdA,
                 Crr = Physics.Crr,
                 Distance = 3000,           
-                AltitudeGain = 300         
+                AltitudeGain = 300,
+                Headwind = 0
             };
     }
 
@@ -128,7 +136,7 @@
 
         if (calculationMode == "PowerToTime" && model.Power.HasValue)
         {
-            velocity = _calculationService.NewtonMethod(aeroDrag, rollingResistance, slopePullForce, model.Power.Value);
+            velocity = _calculationService.NewtonMethod(aeroDrag, model.Headwind, rollingResistance, slopePullForce, model.Power.Value);
             double timeInSeconds = _calculationService.CalculateTimeInSeconds(model.Distance, velocity);
 
             finishTimeMinutes = Math.Floor(timeInSeconds / 60);
@@ -136,15 +144,16 @@
         }
         else if (calculationMode == "TimeToPower" && model.TimeMinutes.HasValue && model.TimeSeconds.HasValue)
         {
-            double totalTimeInSeconds = (model.TimeMinutes.Value * 60) + model.TimeSeconds.Value;
+            double totalTimeInSeconds = _calculationService.ConvertToSeconds(model.TimeMinutes.Value, model.TimeSeconds.Value);
             velocity = _calculationService.CalculateVelocity(model.Distance, totalTimeInSeconds);
 
-            requiredPower = _calculationService.CalculateRequiredPower(
+            requiredPower = _calculationService.CalculateRequiredPower(                
                 velocity,
                 rollingResistance,
                 slopePullForce,
                 model.CdA,
-                airDensity
+                airDensity,
+                model.Headwind
             );
         }
     }
