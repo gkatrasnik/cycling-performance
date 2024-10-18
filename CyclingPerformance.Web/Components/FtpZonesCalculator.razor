@@ -1,0 +1,73 @@
+﻿@using CyclingPerformance.Web.Models
+
+<MudCard>
+    <MudCardHeader>
+        <CardHeaderContent>
+            <MudText Typo="Typo.h6">FTP Zones Calculator</MudText>
+        </CardHeaderContent>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudForm @ref="ftpForm" Model="model" Spacing="5" >
+            <MudNumericField T="double" Label="FTP (W)" @bind-Value="model.FTP" For="() => model.FTP" Required="true" />
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CalculateZones">Calculate Zones</MudButton>
+        </MudForm>
+
+        @if (zonesResults.Count > 0)
+        {
+            <MudSimpleTable Striped="true" Hover="true" Bordered="true" Class="mt-3">
+                <thead>
+                    <tr>
+                        <th>Zone</th>
+                        <th>Description</th>
+                        <th>Range (Watts)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var result in zonesResults)
+                    {
+                        <tr>
+                            <td>@result.Zone</td>
+                            <td>@result.Description</td>
+                            <td>@result.Range</td>
+                        </tr>
+                    }
+                </tbody>
+            </MudSimpleTable>
+        }
+    </MudCardContent>
+</MudCard>
+
+@code {
+    private MudForm ftpForm = new();
+    private FtpCalculatorModel model = new FtpCalculatorModel();
+    private List<FtpZoneModel> zonesResults = new();
+
+    protected override void OnInitialized()
+    {
+        model.FTP = 300;
+    }
+
+    private async Task CalculateZones()
+    {
+        await ftpForm.Validate();
+
+        if (!ftpForm.IsValid)
+        {
+            Console.WriteLine("Form is invalid.");
+            return;
+        }
+
+        var ftp = model.FTP;
+        zonesResults = new List<FtpZoneModel>
+        {
+            new FtpZoneModel("Z1", "Active Recovery", $"< {0.55 * ftp:0} W"),
+            new FtpZoneModel("Z2", "Endurance", $"{0.56 * ftp:0} - {0.75 * ftp:0} W"),
+            new FtpZoneModel("Z3", "Tempo", $"{0.76 * ftp:0} - {0.90 * ftp:0} W"),
+            new FtpZoneModel("Z4", "Lactate Threshold", $"{0.91 * ftp:0} - {1.05 * ftp:0} W"),
+            new FtpZoneModel("Z5", "VO2 Max", $"{1.06 * ftp:0} - {1.20 * ftp:0} W"),
+            new FtpZoneModel("Z6", "Anaerobic Capacity", $"{1.21 * ftp:0} - {1.50 * ftp:0} W"),
+            new FtpZoneModel("Z7", "Neuromuscular Power", $"> {1.50 * ftp:0} W")
+        };
+    }  
+}

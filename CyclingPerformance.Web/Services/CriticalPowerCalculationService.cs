@@ -19,5 +19,10 @@
             double t = 1 / timeInSeconds; // Reciprocal of time in seconds
             return (m * t + cp);
         }
+
+        public double CalculateFtpFromCp(double cp)
+        { 
+            return (cp * 0.96); 
+        }
     }
 }

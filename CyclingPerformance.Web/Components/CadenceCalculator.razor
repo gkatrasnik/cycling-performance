@@ -8,7 +8,7 @@
         </CardHeaderContent>
     </MudCardHeader>
     <MudCardContent>    
-        <MudForm @ref="cadenceCalculatorForm" Model="model" Spacing="5" Validated="OnValidSubmit">
+        <MudForm @ref="cadenceCalculatorForm" Model="model" Spacing="5" >
             <MudTextField T="string" Label="Chainrings (comma separated)" @bind-Value="chainringsInput" Required="true" />
             <MudTextField T="string" Label="Sprockets (comma separated)" @bind-Value="sprocketsInput" Required="true" />
 

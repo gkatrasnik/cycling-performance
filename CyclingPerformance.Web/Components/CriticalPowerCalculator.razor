@@ -8,7 +8,7 @@
         </CardHeaderContent>
     </MudCardHeader>
     <MudCardContent>
-        <MudForm @ref="criticalPowerForm" Spacing="5" Validated="OnValidSubmit">
+        <MudForm @ref="criticalPowerForm" Spacing="5">
             <MudGrid>
                 <MudItem xs="6">
                     <MudNumericField T="double" Label="Time 1 (min)" @bind-Value="model.Time1" For="() => model.Time1" Min="1" Max="model.Time2" Required="true" />
@@ -44,6 +44,7 @@
             <div class="my-3">
                 <MudText Typo="Typo.h6" Color="Color.Primary">Critical power: @cp W</MudText>
                 <MudText Typo="Typo.h6" Color="Color.Primary">W': @wPrime kJ</MudText>
+                <MudText Typo="Typo.h6" Color="Color.Primary">FTP: @ftp W</MudText>
             </div>
 
             <MudChart ChartType="ChartType.Line" ChartSeries="@datasets" @bind-SelectedIndex="selectedIndex" XAxisLabels="@labels" ChartOptions="chartOptions" Width="100%" Class="px-3"/>
@@ -65,6 +66,7 @@
     private double m;
     private double cp;
     private double wPrime;
+    private double ftp;
 
     private string[] labels = [];
     private List<ChartSeries> datasets = new List<ChartSeries>();
@@ -104,6 +106,7 @@
         m = _criticalPowerCalculatorService.CalculateM(1 / t1InSeconds, 1 / t2InSeconds, 1 / t3InSeconds, model.Power1, model.Power2, model.Power3);
         cp = Math.Round(_criticalPowerCalculatorService.CalculateCP(m, 1 / t1InSeconds, 1 / t2InSeconds, 1 / t3InSeconds, model.Power1, model.Power2, model.Power3));
         wPrime = Math.Round(m / 1000, 2); // Displaying W' in kJ directly
+        ftp = Math.Round(_criticalPowerCalculatorService.CalculateFtpFromCp(cp));
 
         List<(double TimeInSeconds, string Label, double Power)> durations = new List<(double, string, double)>();
 
@@ -133,9 +136,6 @@
             new ChartSeries { Name = "Power Duration", Data = sortedDurations.Select(d => d.Power).ToArray() }
         };
     }
-
-
-
 
     private void OnValidSubmit()
     {
