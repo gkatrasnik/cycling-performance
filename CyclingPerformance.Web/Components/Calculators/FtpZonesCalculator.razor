@@ -11,7 +11,14 @@
     </MudCardHeader>
     <MudCardContent>
         <MudForm @ref="ftpForm" Model="model" Spacing="5" >
-            <MudNumericField T="double" Label="FTP (W)" @bind-Value="model.FTP" For="() => model.FTP" Min="1" Required="true" />
+            <MudGrid>
+                <MudItem xs="6">
+                    <MudNumericField T="double" Label="FTP (W)" @bind-Value="model.FTP" For="() => model.FTP" Min="1" Required="true" />
+                </MudItem>
+                <MudItem xs="6">
+                    <MudNumericField T="double" Label="Rider Weight (kg)" @bind-Value="model.MassOfRider" For="() => model.MassOfRider" Min="1" Required="true" />
+                </MudItem>
+            </MudGrid>
 
             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CalculateZones">Calculate</MudButton>
         </MudForm>
@@ -24,6 +31,7 @@
                         <th>Zone</th>
                         <th>Description</th>
                         <th>Range (W)</th>
+                        <th>Range (W/kg)</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -32,7 +40,8 @@
                         <tr>
                             <td>@result.Zone</td>
                             <td>@result.Description</td>
-                            <td>@result.Range</td>
+                            <td>@result.RangeAbsolute</td>
+                            <td>@result.RangeRelative</td>
                         </tr>
                     }
                 </tbody>
@@ -49,6 +58,7 @@
     protected override void OnInitialized()
     {
         model.FTP = 300;
+        model.MassOfRider = 70;
     }
 
     private async Task CalculateZones()
@@ -62,15 +72,16 @@
         }
 
         var ftp = model.FTP;
+        var mass = model.MassOfRider;
         zonesResults = new List<FtpZoneModel>
         {
-            new FtpZoneModel("Z1", "Active Recovery", $"< {0.55 * ftp:0} W"),
-            new FtpZoneModel("Z2", "Endurance", $"{0.56 * ftp:0} - {0.75 * ftp:0} W"),
-            new FtpZoneModel("Z3", "Tempo", $"{0.76 * ftp:0} - {0.90 * ftp:0} W"),
-            new FtpZoneModel("Z4", "Lactate Threshold", $"{0.91 * ftp:0} - {1.05 * ftp:0} W"),
-            new FtpZoneModel("Z5", "VO2 Max", $"{1.06 * ftp:0} - {1.20 * ftp:0} W"),
-            new FtpZoneModel("Z6", "Anaerobic Capacity", $"{1.21 * ftp:0} - {1.50 * ftp:0} W"),
-            new FtpZoneModel("Z7", "Neuromuscular Power", $"> {1.50 * ftp:0} W")
+            new FtpZoneModel("Z1", "Active Recovery", $"< {0.55 * ftp:0} W", $"< {0.55 * ftp / mass:0.00} W/Kg"),
+            new FtpZoneModel("Z2", "Endurance", $"{0.56 * ftp:0} - {0.75 * ftp:0} W", $"{0.56 * ftp / mass:0.00} - {0.75 * ftp / mass:0.00} W/Kg"),
+            new FtpZoneModel("Z3", "Tempo", $"{0.76 * ftp:0} - {0.90 * ftp:0} W", $"{0.76 * ftp / mass:0.00} - {0.90 * ftp / mass:0.00} W/Kg"),
+            new FtpZoneModel("Z4", "Lactate Threshold", $"{0.91 * ftp:0} - {1.05 * ftp:0} W", $"{0.91 * ftp / mass:0.00} - {1.05 * ftp / mass:0.00} W/Kg"),
+            new FtpZoneModel("Z5", "VO2 Max", $"{1.06 * ftp:0} - {1.20 * ftp:0} W", $"{1.06 * ftp / mass:0.00} - {1.20 * ftp / mass:0.00} W/Kg"),
+            new FtpZoneModel("Z6", "Anaerobic Capacity", $"{1.21 * ftp:0} - {1.50 * ftp:0} W", $"{1.21 * ftp / mass:0.00} - {1.50 * ftp / mass:0.00} W/Kg"),
+            new FtpZoneModel("Z7", "Neuromuscular Power", $"> {1.50 * ftp:0} W", $"> {1.50 * ftp / mass:0.00} W/Kg")
         };
     }
 

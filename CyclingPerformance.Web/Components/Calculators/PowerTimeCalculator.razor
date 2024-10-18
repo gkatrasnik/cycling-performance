@@ -36,10 +36,10 @@
 
             <MudGrid>
                 <MudItem xs="6">
-                    <MudNumericField T="double" Label="Rider Mass (kg)" @bind-Value="model.MassOfRider" For="() => model.MassOfRider" Required="true" />
+                    <MudNumericField T="double" Label="Rider Weight (kg)" @bind-Value="model.MassOfRider" For="() => model.MassOfRider" Required="true" />
                 </MudItem>
                 <MudItem xs="6">
-                    <MudNumericField T="double" Label="Bicycle Mass (kg)" @bind-Value="model.MassOfBike" For="() => model.MassOfBike" Required="true" />
+                    <MudNumericField T="double" Label="Bicycle Weight (kg)" @bind-Value="model.MassOfBike" For="() => model.MassOfBike" Required="true" />
                 </MudItem>
             </MudGrid>
         
@@ -76,19 +76,19 @@
         {
             <div class="mt-3">
                 <MudText Typo="Typo.h6" Color="Color.Primary">Finish Time: @finishTimeMinutes min @finishTimeSeconds s</MudText>
-                <MudText Typo="Typo.h6" Color="Color.Primary">Avg. Speed: @_calculationService.MsToKmh(avgSpeed) km/h</MudText>
+                <MudText Typo="Typo.h6" Color="Color.Primary">Relative Power: @relativePower W/Kg</MudText>
                 <MudText Typo="Typo.h6" Color="Color.Primary">VAM: @vam m/h</MudText>
-                <MudText Typo="Typo.h6" Color="Color.Primary">Relative power: @relativePower W/Kg</MudText>
+                <MudText Typo="Typo.h6" Color="Color.Primary">Avg. Speed: @_calculationService.MsToKmh(avgSpeed) km/h</MudText>
             </div>
 
         }
         else if (calculationMode == "TimeToPower" && requiredPower != null)
         {
             <div class="mt-3">
-                <MudText Typo="Typo.h6" Color="Color.Primary">Required Power: @requiredPower.Value Watt</MudText>
-                <MudText Typo="Typo.h6" Color="Color.Primary">Avg. Speed: @_calculationService.MsToKmh(avgSpeed) km/h</MudText>
+                <MudText Typo="Typo.h6" Color="Color.Primary">Required Power: @requiredPower.Value W</MudText>
+                <MudText Typo="Typo.h6" Color="Color.Primary">Relative Power: @relativePower W/Kg</MudText>
                 <MudText Typo="Typo.h6" Color="Color.Primary">VAM: @vam m/h</MudText>
-                <MudText Typo="Typo.h6" Color="Color.Primary">Relative power: @relativePower W/Kg</MudText>
+                <MudText Typo="Typo.h6" Color="Color.Primary">Avg. Speed: @_calculationService.MsToKmh(avgSpeed) km/h</MudText>
             </div>
         }
 

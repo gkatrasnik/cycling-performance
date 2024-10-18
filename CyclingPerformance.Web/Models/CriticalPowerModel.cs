@@ -21,5 +21,7 @@ namespace CyclingPerformance.Web.Models
 
         [Range(1, double.MaxValue, ErrorMessage = "Power 3 must be greater than 1")]
         public double Power3 { get; set; }
+        [Range(1, double.MaxValue, ErrorMessage = "Rider weight must be greater than 1")]
+        public double RiderWeight { get; set; }
     }
 }

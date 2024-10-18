@@ -12,8 +12,8 @@
     </MudCardHeader>
     <MudCardContent>    
         <MudForm @ref="cadenceSpeedCalculatorForm" Model="model" Spacing="5" >
-            <MudTextField T="string" Label="Chainrings (comma separated)" @bind-Value="chainringsInput" Required="true" />
-            <MudTextField T="string" Label="Sprockets (comma separated)" @bind-Value="sprocketsInput" Required="true" />
+            <MudTextField T="string" Label="Chainrings (e.g., 36,52)" @bind-Value="chainringsInput" Required="true" />
+            <MudTextField T="string" Label="Sprockets (e.g., 11,12,13...)" @bind-Value="sprocketsInput" Required="true" />
 
             <MudGrid>
                 <MudItem xs="6">

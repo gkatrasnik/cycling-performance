@@ -39,15 +39,17 @@
                 </MudItem>
             </MudGrid>
 
+            <MudNumericField T="double" Label="Rider weight (kg)" @bind-Value="model.RiderWeight" For="() => model.RiderWeight" Min="1" Required="true" />
+
             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Calculate">Calculate</MudButton>
         </MudForm>
 
         @if (cp != 0 && wPrime != 0)
         {
             <div class="my-3">
-                <MudText Typo="Typo.h6" Color="Color.Primary">Critical power: @cp W</MudText>
+                <MudText Typo="Typo.h6" Color="Color.Primary">Critical Power: @cp W (@relativeCp W/kg)</MudText>
+                <MudText Typo="Typo.h6" Color="Color.Primary">FTP: @ftp W (@relativeFtp W/kg)</MudText>
                 <MudText Typo="Typo.h6" Color="Color.Primary">W': @wPrime kJ</MudText>
-                <MudText Typo="Typo.h6" Color="Color.Primary">FTP: @ftp W</MudText>
             </div>
 
             <MudChart ChartType="ChartType.Line" ChartSeries="@datasets" @bind-SelectedIndex="selectedIndex" XAxisLabels="@labels" ChartOptions="chartOptions" Width="100%" Class="px-3"/>
@@ -63,13 +65,15 @@
     private int selectedIndex = -1;
     public ChartOptions chartOptions = new ChartOptions()
     {
-        InterpolationOption = InterpolationOption.NaturalSpline
+        InterpolationOption = InterpolationOption.Straight
     };
 
     private double m;
     private double cp;
     private double wPrime;
     private double ftp;
+    private double relativeCp;
+    private double relativeFtp;
 
     private string[] labels = [];
     private List<ChartSeries> datasets = new List<ChartSeries>();
@@ -83,7 +87,8 @@
                 Time2 = 5,
                 Power2 = 400,
                 Time3 = 20,
-                Power3 = 350
+                Power3 = 350,
+                RiderWeight = 70
             };
     }
 
@@ -111,6 +116,9 @@
         wPrime = Math.Round(m / 1000, 2); // Displaying W' in kJ directly
         ftp = Math.Round(_criticalPowerCalculatorService.CalculateFtpFromCp(cp));
 
+        relativeCp = Math.Round(cp / model.RiderWeight, 2);
+        relativeFtp = Math.Round(ftp / model.RiderWeight, 2);
+
         List<(double TimeInSeconds, string Label, double Power)> durations = new List<(double, string, double)>();
 
         int[] intervalsInMinutes = new int[] { 1, 2, 3, 5, 8, 12, 20, 60, 120, 180 }; // These are minutes
@@ -136,7 +144,7 @@
         labels = sortedDurations.Select(d => d.Label).ToArray();
         datasets = new List<ChartSeries>
         {
-            new ChartSeries { Name = "Power Duration", Data = sortedDurations.Select(d => d.Power).ToArray() }
+            new ChartSeries { Name = "Power - Duration Curve", Data = sortedDurations.Select(d => d.Power).ToArray() }
         };
     }
 
