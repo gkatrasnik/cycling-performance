@@ -73,8 +73,9 @@
         {
             <div class="mt-3">
                 <MudText Typo="Typo.h6" Color="Color.Primary">Finish Time: @finishTimeMinutes min @finishTimeSeconds s</MudText>
-                <MudText Typo="Typo.h6" Color="Color.Primary">Avg. Speed: @_calculationService.MsToKmh(velocity) km/h</MudText>
-                <MudText Typo="Typo.h6" Color="Color.Primary">VAM: @_calculationService.CalculateVAM(model.AltitudeGain, _calculationService.ConvertToSeconds(finishTimeMinutes.Value, finishTimeSeconds.Value)) m/h</MudText>
+                <MudText Typo="Typo.h6" Color="Color.Primary">Avg. Speed: @_calculationService.MsToKmh(avgSpeed) km/h</MudText>
+                <MudText Typo="Typo.h6" Color="Color.Primary">VAM: @vam m/h</MudText>
+                <MudText Typo="Typo.h6" Color="Color.Primary">Relative power: @relativePower W/Kg</MudText>
             </div>
 
         }
@@ -82,8 +83,9 @@
         {
             <div class="mt-3">
                 <MudText Typo="Typo.h6" Color="Color.Primary">Required Power: @requiredPower.Value Watt</MudText>
-                <MudText Typo="Typo.h6" Color="Color.Primary">Avg. Speed: @_calculationService.MsToKmh(velocity) km/h</MudText>
-                <MudText Typo="Typo.h6" Color="Color.Primary">VAM: @_calculationService.CalculateVAM(model.AltitudeGain, _calculationService.ConvertToSeconds(model.TimeMinutes!.Value, model.TimeSeconds!.Value)) m/h</MudText>
+                <MudText Typo="Typo.h6" Color="Color.Primary">Avg. Speed: @_calculationService.MsToKmh(avgSpeed) km/h</MudText>
+                <MudText Typo="Typo.h6" Color="Color.Primary">VAM: @vam m/h</MudText>
+                <MudText Typo="Typo.h6" Color="Color.Primary">Relative power: @relativePower W/Kg</MudText>
             </div>
         }
 
@@ -99,7 +101,9 @@
     private double? finishTimeMinutes;
     private double? finishTimeSeconds;
     private double? requiredPower;
-    private double velocity;
+    private double avgSpeed;
+    private double vam;
+    private double relativePower;
 
     protected override void OnInitialized()
     {
@@ -136,25 +140,31 @@
 
         if (calculationMode == "PowerToTime" && model.Power.HasValue)
         {
-            velocity = _calculationService.NewtonMethod(aeroDrag, model.Headwind, rollingResistance, slopePullForce, model.Power.Value);
-            double timeInSeconds = _calculationService.CalculateTimeInSeconds(model.Distance, velocity);
+            avgSpeed = _calculationService.NewtonMethod(aeroDrag, model.Headwind, rollingResistance, slopePullForce, model.Power.Value);
+            double timeInSeconds = _calculationService.CalculateTimeInSeconds(model.Distance, avgSpeed);
 
             finishTimeMinutes = Math.Floor(timeInSeconds / 60);
             finishTimeSeconds = Math.Floor(timeInSeconds % 60);
+
+            vam = @_calculationService.CalculateVAM(model.AltitudeGain, _calculationService.ConvertToSeconds(finishTimeMinutes.Value, finishTimeSeconds.Value));
+            relativePower = @_calculationService.CalculateWkg(model.Power!.Value, model.MassOfRider);
         }
         else if (calculationMode == "TimeToPower" && model.TimeMinutes.HasValue && model.TimeSeconds.HasValue)
         {
             double totalTimeInSeconds = _calculationService.ConvertToSeconds(model.TimeMinutes.Value, model.TimeSeconds.Value);
-            velocity = _calculationService.CalculateVelocity(model.Distance, totalTimeInSeconds);
+            avgSpeed = _calculationService.CalculateVelocity(model.Distance, totalTimeInSeconds);
 
             requiredPower = _calculationService.CalculateRequiredPower(                
-                velocity,
+                avgSpeed,
                 rollingResistance,
                 slopePullForce,
                 model.CdA,
                 airDensity,
                 model.Headwind
             );
+
+            vam = @_calculationService.CalculateVAM(model.AltitudeGain, _calculationService.ConvertToSeconds(model.TimeMinutes!.Value, model.TimeSeconds!.Value));
+            relativePower = @_calculationService.CalculateWkg(requiredPower.Value, model.MassOfRider);
         }
     }
 

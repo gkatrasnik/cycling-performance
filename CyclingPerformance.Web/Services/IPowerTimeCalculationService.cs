@@ -12,6 +12,7 @@
         double CalculateRequiredPower(double velocity, double rollingResistance, double slopeForce, double cda, double airDensity, double headwind);
         double CalculateAeroDragCoefficient(double cda, double airDensity);
         double CalculateVAM(double ascend, double timeInSeconds);
+        double CalculateWkg(double power, double massOfRider);
         double NewtonMethod(double cda, double headwind,double rollingResistance, double slopePullForce, double power);
         double MsToKmh(double velocityMs);
         double ConvertToSeconds(double timeMinutes, double timeSeconds);

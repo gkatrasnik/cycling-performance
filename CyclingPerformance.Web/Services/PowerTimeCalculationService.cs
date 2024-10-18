@@ -59,6 +59,11 @@ namespace CyclingPerformance.Web.Services
             return Math.Round(ascend / timeInHours);
         }
 
+        public double CalculateWkg(double power, double massOfRider)
+        { 
+            return Math.Round(power / massOfRider, 2);
+        }
+
         public double NewtonMethod(double cda, double headwind, double rollingResistance, double slopePullForce, double power)
         {
             double vel = 20; // Initial guess for velocity in m/s
